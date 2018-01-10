@@ -1,6 +1,7 @@
 package com.fesine.auth.springsecurity.config;
 
 import com.fesine.auth.springsecurity.service.MyUserService;
+import com.fesine.auth.springsecurity.util.MyPasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders
@@ -26,19 +27,26 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     private MyUserService myUserService;
 
     /**
-     * 配置验证登录校验，用户信息保存在内存中
+     * 配置验证登录校验，
      * @param auth
      * @throws Exception
      */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        //用户信息保存在内存中
         //auth.inMemoryAuthentication().withUser("admin").password("123456").roles("ADMIN");
         ////可以添加多个用户
         //auth.inMemoryAuthentication().withUser("fesine").password("fesine").roles("ADMIN");
         //auth.inMemoryAuthentication().withUser("demo").password("demo").roles("USER");
 
         //通过此方法可以使用自定义的数据库验证处理
-        auth.userDetailsService(myUserService);
+        //auth.userDetailsService(myUserService);
+        //使用自定义的数据库验证,密码加密处理
+        auth.userDetailsService(myUserService).passwordEncoder(new MyPasswordEncoder());
+
+        //使用spring security默认的jdbc处理。预先执行users.ddl，添加表结构
+        auth.jdbcAuthentication().usersByUsernameQuery("").authoritiesByUsernameQuery("")
+                .passwordEncoder(new MyPasswordEncoder());
     }
 
     /**
